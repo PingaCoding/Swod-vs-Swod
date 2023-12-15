@@ -6,16 +6,15 @@ extends Area3D
 @onready var player = get_node("/root/Level 1/Player")
 
 var clicked = 0
-	
+
 func _input_event(camera, event, click_position, click_normal, shape_idx):
 	if event is InputEventMouseButton:
 		if clicked == 0:
 			if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 				clicked += 1
-				choose_attack(mesh.scale == Vector3(20, 20, 20))
+				choose_attack(mesh.scale == Vector3(1.2, 1.2, 1.2))
 		else:
 			clicked = 0
-	
 
 func _ready():
 	self.connect("input_event", _input_event)
@@ -24,8 +23,8 @@ func _ready():
 
 func choose_attack(active):
 	if active:
-		mesh.scale = Vector3(15, 15, 15)
+		mesh.scale = Vector3(1, 1, 1)
 		player.choose_attack(self.name, false)
 	else:
-		mesh.scale = Vector3(20, 20, 20)
+		mesh.scale = Vector3(1.2, 1.2, 1.2)
 		player.choose_attack(self.name, true)
