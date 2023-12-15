@@ -1,4 +1,4 @@
-extends CharacterBody3D
+extends Node3D
 
 @export_subgroup("Attack")
 var attacks = []
@@ -8,7 +8,7 @@ var animations = []
 
 @onready var animPlayer = $AnimationPlayer
 @onready var animTree : AnimationTree = $AnimationTree
-@onready var bodyPartsMain = get_node("BodyParts")
+@onready var bodyPartsMain = $Player/Skeleton3D/BodyParts
 @onready var fightButton = $PlayerCanvas/Button
 var bodyParts = []
 
@@ -40,15 +40,15 @@ func start_round():
 	for attack in attacks:
 			match attack:
 				"HeadArea":
-					if !animations.has("Head_Attack"):
-						animations.append("Head_Attack")
+					if !animations.has("Head_Attack_1"):
+						animations.append("Head_Attack_1")
 				"ChestArea":
-					if !animations.has("Chest_Attack"):
-						animations.append("Chest_Attack")
+					if !animations.has("Chest_Attack_1"):
+						animations.append("Chest_Attack_1")
 						
 				"LegArea":
-					if !animations.has("Leg_Attack"):
-						animations.append("Leg_Attack")
+					if !animations.has("Leg_Attack_1"):
+						animations.append("Leg_Attack_1")
 
 	if len(animations) > 0 and len(animations) <= len(attacks):
 		bodyPartsMain.visible = false
