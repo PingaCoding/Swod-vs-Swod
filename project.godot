@@ -25,6 +25,12 @@ window/size/viewport_height=720
 movie_writer/movie_file="C:/Users/Work/Desktop/Jogo/Swod vs Swod/Movies/movie.avi"
 movie_writer/disable_vsync=true
 
+[importer_defaults]
+
+animation_library={
+"animation/fps": 60.0
+}
+
 [input]
 
 head_attack={

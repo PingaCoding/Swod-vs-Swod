@@ -1,21 +1,32 @@
 extends Node3D
 
-@export_subgroup("Attack")
-var attacks = []
-@export var maxAttacks = 2
+signal anim_finished
 
-var animations = []
+var maxAttacks = 2
+var attacks = []
+var attack_animations = []
+var defenses = []
+var defense_animations
 
 @onready var animPlayer = $AnimationPlayer
-@onready var animTree : AnimationTree = $AnimationTree 
+@onready var animPlayerList = $AnimationPlayer.get_animation_list()
 @onready var bodyPartsMain = $Player/Skeleton3D/BodyParts
 @onready var fightButton = $PlayerCanvas/Button
+
+@onready var fightManager = get_node("/root/Level 1/FightManager")
+
 var bodyParts = []
 
 func _ready():
 	# Add the finish animation method to AnimationTree and play idle animation
-	animTree.connect("animation_finished", Callable(self, "_on_animation_finished"))
-	animTree["parameters/conditions/Battle_Idle_1"] = true
+	animPlayer.connect("animation_finished", Callable(self, "_on_animation_finished"))
+	animPlayer.play("Battle_Idle_1")
+	
+	# Define animations transitions blend time
+	for i in range(animPlayerList.size()):
+		for j in range(animPlayerList.size()):
+			if i != j:
+				animPlayer.set_blend_time(animPlayerList[i], animPlayerList[j], 0.2)
 	
 	# Add body parts to your variable
 	for child in bodyPartsMain.get_children():
@@ -29,7 +40,7 @@ func choose_attack(attack, add):
 	# Adding attack
 	if add:
 		# If there's less than 2 attacks add the current one
-		if len(attacks) < 2:
+		if len(attacks) < maxAttacks:
 			if attack not in attacks:
 				attacks.append(attack)
 				
@@ -52,21 +63,21 @@ func start_round():
 			# Queue attacks for animation
 			match attack:
 				"HeadArea":
-					if !animations.has("Head_Attack_1") and !animations.has("Head_Attack_2"):
-						animations.append("Head_Attack_" + randNumber(1, 2))
+					if !attack_animations.has("Head_Attack_1") and !attack_animations.has("Head_Attack_2"):
+						attack_animations.append("Head_Attack_" + randNumber(1, 2))
 				"ChestArea":
-					if !animations.has("Chest_Attack_1") and !animations.has("Chest_Attack_2") and !animations.has("Chest_Attack_3"):
-						animations.append("Chest_Attack_" + randNumber(1, 3))
+					if !attack_animations.has("Chest_Attack_1") and !attack_animations.has("Chest_Attack_2") and !attack_animations.has("Chest_Attack_3"):
+						attack_animations.append("Chest_Attack_" + randNumber(1, 3))
 				"LegArea":
-					if !animations.has("Leg_Attack_1") and !animations.has("Leg_Attack_2"):
-						animations.append("Leg_Attack_" + randNumber(1, 2))
+					if !attack_animations.has("Leg_Attack_1") and !attack_animations.has("Leg_Attack_2"):
+						attack_animations.append("Leg_Attack_" + randNumber(1, 2))
 
-	# If there's playable animations hide extra itens and start the attacks
-	if len(animations) > 0 and len(animations) <= len(attacks):
+	# If there's playable attack_animations hide extra itens and start the attacks
+	if len(attack_animations) > 0 and len(attack_animations) <= len(attacks):
 		bodyPartsMain.visible = false
 		fightButton.visible = false
-				
-		load_attacks()
+		
+		fightManager.start_round()
 		
 # Return a random number
 func randNumber(min, max):
@@ -74,36 +85,19 @@ func randNumber(min, max):
 	
 	return str(number)
 
-# Start player attacks
-func load_attacks():
-	# Deactivate idle state
-	animTree["parameters/conditions/Battle_Idle_1"] = false
-	# Run first attack
-	animTree["parameters/conditions/" + animations[0]] = true
-
+func attack(attack):
+	animPlayer.play(attack)
+	
+func defense(defense):
+	animPlayer.play(defense)
+	
 # On every finished animation
 func _on_animation_finished(anim):
-	# Get the animation index
-	var index = animations.find(anim)
-	
-	# Deactivate current animation
-	animTree["parameters/conditions/" + animations[index]] = false
+	emit_signal("anim_finished", "Player")
 
-	# If there's remaining animations play it
-	if index + 1 < animations.size():
-		animTree["parameters/conditions/" + animations[index + 1]] = true
+func get_attacks():
+	return attack_animations
 	
-	# Otherwise end round
-	else:
-		animTree["parameters/conditions/Battle_Idle_1"] = true
-		end_round()
+func get_defenses():
+	return defense_animations
 
-# Temporary
-# End round
-func end_round():
-	# Reset animations, body parts and fight button
-	animations = []
-	for bodyPart in bodyParts:
-		bodyPart.choose_attack(true)
-	bodyPartsMain.visible = true
-	fightButton.visible = true
