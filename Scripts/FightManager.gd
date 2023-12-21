@@ -34,12 +34,8 @@ var defenseCharacter = ""
 
 # Start round
 func start_round():
-	print("Player Attacks: ", player.get_attacks())
-	print("Player Defenses: ", player.get_defenses())
-	print("Enemy Attacks: ", enemy.get_attacks())
-	print("Enemy Defenses: ", enemy.get_defenses())
-	print("A New Round Started")
-	print("Current round: ", current_round)
+	# Define enemy attacks and defenses
+	enemy.choose_attacks_defenses()
 	
 	# Disable the not battle UI
 	player.bodyPartsMain.visible = false
@@ -87,7 +83,6 @@ func attack_defense(current_round):
 			attackCharacter =  defenseCharacter
 			defenseCharacter = temp
 		
-		print(characters[attackCharacter])
 		# Activate attack by attack
 		for attack in characters[attackCharacter]["attacks"]:
 			characters[attackCharacter]["character"].attack(attack)
@@ -114,15 +109,16 @@ func end_round():
 	# Enable the not battle UI
 	player.bodyPartsMain.visible = true
 	for bodyPart in player.bodyParts:
-		bodyPart.choose_attack(true)
+		bodyPart.choose_attack_defense(true)
 	player.fightButton.visible = true
 	enemy.bodyPartsMain.visible = true
+	for bodyPart in enemy.bodyParts:
+		bodyPart.choose_attack_defense(true)
 	
 	# Reset fight attributtes
 	player.set_attacks([])
 	player.set_defenses([])
-	enemy.set_attacks([])
-	enemy.set_defenses([])
+	enemy.choose_attacks_defenses()
 	characters["Player"]["attacks"] = []
 	characters["Player"]["attacks"] = []
 	characters["Enemy"]["attacks"] = []

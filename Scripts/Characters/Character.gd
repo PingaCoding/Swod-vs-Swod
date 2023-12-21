@@ -2,6 +2,8 @@ extends Node
 
 var attacks = []
 var defenses = []
+var maxAttacks
+var maxDefenses
 
 var bodyParts = []
 

@@ -2,8 +2,6 @@ extends "res://Scripts/Characters/Character.gd"
 
 signal anim_finished
 
-var maxAttacksDefenses = 2
-
 @onready var animPlayer = $AnimationPlayer
 @onready var fightManager = get_node("/root/Level 1/FightManager")
 var bodyPartsMain
@@ -12,8 +10,9 @@ func _ready():
 	# Add the finish animation method to AnimationTree and play idle animation
 	animPlayer.connect("animation_finished", Callable(self, "_on_animation_finished"))
 	animPlayer.play("Battle_Idle_1")
+	
+	# Define body parts objects
 	set_body_parts(bodyPartsMain)
-	choose_attacks_defenses()
 	
 	pass
 
@@ -27,20 +26,25 @@ func choose_attacks_defenses():
 	var defenses_animations = animations.filter(func(animation): return animation.split("_")[1] == "Defense")
 		
 	# Append attributes to the arrays
-	attacks = select_random_attacks_defenses(attacks_animations)
-	defenses  = select_random_attacks_defenses(defenses_animations)
+	attacks = select_random_attacks_defenses(attacks_animations, "attacks")
+	defenses  = select_random_attacks_defenses(defenses_animations, "defenses")
 
 # Randomly selects attacks and defenses
-func select_random_attacks_defenses(array):
+func select_random_attacks_defenses(array, type):
 	var selected = []
 	var items = 0
+	var max
+	if type == "attacks":
+		max = maxAttacks
+	else:
+		max = maxDefenses
 	
 	# For every array item get it index
 	for i in range(array.size()):
 		var index = randi() % array.size()
 		#If an item has already been chosen and the maximum limit has not been reached
 		if selected:
-			if items < maxAttacksDefenses:
+			if items < max:
 				#Check if body area has already been chosen, if not append item to array.
 				if array[index].split("_")[0] not in selected[0].split("_")[0]:
 					selected.append(array[index])
@@ -69,4 +73,5 @@ func defense(defense):
 func _on_animation_finished(anim):
 	animPlayer.play("Battle_Idle_1")
 	emit_signal("anim_finished", "Enemy")
+
 
