@@ -6,8 +6,8 @@ extends "res://Scripts/Characters/Enemy.gd"
 func _ready():
 	enemy.bodyPartsMain = bodyPartsMainE
 	
-	enemy.maxAttacks = 2
-	enemy.maxDefenses = 1
+	enemy.maxAttacks = 3
+	enemy.maxDefenses = 3
 	
 	enemy.set_attacks(attacks)
 	enemy.set_defenses(defenses)

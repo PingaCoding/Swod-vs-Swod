@@ -12,6 +12,7 @@ var enemyDefenses = []
 
 signal attack_anim_finished()
 signal defense_anim_finished()
+signal impact_anim_finished()
 
 var attackCharacter = ""
 var defenseCharacter = ""
@@ -60,17 +61,21 @@ func start_round():
 	enemy.anim_finished.connect(anim_finished_signal)
 	
 	# Start attacks and defenses
-	attack_defense(current_round)
+	attack_defense()
 
 # Emit signals for finished animations
-func anim_finished_signal(user):
-	if user == attackCharacter:
+func anim_finished_signal(anim):
+	if anim.split("_")[1] == "Attack":
 		emit_signal("attack_anim_finished")
-	else:
+
+	elif anim.split("_")[1] == "Defense":
 		emit_signal("defense_anim_finished")
+
+	elif anim.split("_")[1] == "Impact":
+		emit_signal("impact_anim_finished")
 	
 # Manage attacks and defenses
-func attack_defense(current_round):
+func attack_defense():
 	# End rounds
 	if current_round > 2:
 		end_round()
@@ -87,19 +92,28 @@ func attack_defense(current_round):
 		for attack in characters[attackCharacter]["attacks"]:
 			characters[attackCharacter]["character"].attack(attack)
 			#characters[defenseCharacter]["character"].take_damage(characters[attackCharacter]["damage"])
+			var noDefense = 0
 
 			# Check if attack has a defense for it and if yes activate
-			for defense in characters[defenseCharacter]["defenses"]:
+			for defense in characters[defenseCharacter]["defenses"]: 
 				if attack.split("_")[0] == defense.split("_")[0]:
 					characters[defenseCharacter]["character"].defense(defense)
 					# Wait defense animation to end
 					await defense_anim_finished
+				else:
+					noDefense+=1
+
+			if noDefense == len(characters[defenseCharacter]["defenses"]):
+				characters[defenseCharacter]["character"].impact(attack)
+				await impact_anim_finished
+				print("Impact occured ", attack)
 			
 			# Wait attack animation to end
 			await attack_anim_finished
 		
 		# Start next round
-		attack_defense(current_round + 1)
+		current_round += 1
+		attack_defense()
 
 # End round
 func end_round():

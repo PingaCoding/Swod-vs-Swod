@@ -5,7 +5,6 @@ signal anim_finished
 var attacks_areas = []
 var defenses_areas = []
 
-@onready var animPlayer = $AnimationPlayer
 @onready var fightButton = $PlayerCanvas/Button
 @onready var bodyPartsMain = $Player/Skeleton3D/BodyParts
 @onready var fightManager = get_node("/root/Level 1/FightManager")
@@ -13,6 +12,9 @@ var defenses_areas = []
 @onready var enemy = get_node("/root/Level 1/Enemy")
 
 func _ready():
+	# Define anim player
+	animPlayer = $AnimationPlayer
+	
 	# Add the finish animation method to AnimationTree and play idle animation
 	animPlayer.connect("animation_finished", Callable(self, "_on_animation_finished"))
 	animPlayer.play("Battle_Idle_1")
@@ -20,9 +22,12 @@ func _ready():
 	# Define body parts objects
 	set_body_parts(bodyPartsMain)
 	
+	# Define animations blend time
+	set_animations_blend_time()
+	
 	# Define max attacks and defenses
-	maxAttacks = 2
-	maxDefenses = 1
+	maxAttacks = 3
+	maxDefenses = 3
 	
 	pass
 
@@ -63,23 +68,23 @@ func choose_attack_defense(type, option, add):
 
 func start_round():
 	# All attacks in round attacks
-	for attack in attacks_areas:
+	for a in attacks_areas:
 			# Queue attacks for animation
-			match attack:
+			match a:
 				"HeadArea":
 					if !attacks.has("Head_Attack_1") and !attacks.has("Head_Attack_2"):
-						attacks.append("Head_Attack_" + randNumber(1, 2))
+						attacks.append("Head_Attack_" + randNumber(2, 2))
 				"ChestArea":
 					if !attacks.has("Chest_Attack_1") and !attacks.has("Chest_Attack_2") and !attacks.has("Chest_Attack_3"):
-						attacks.append("Chest_Attack_" + randNumber(1, 3))
+						attacks.append("Chest_Attack_" + randNumber(1, 1))
 				"LegArea":
 					if !attacks.has("Leg_Attack_1") and !attacks.has("Leg_Attack_2"):
-						attacks.append("Leg_Attack_" + randNumber(1, 2))
+						attacks.append("Leg_Attack_" + randNumber(1, 1))
 						
 	# All defenses in round defenses
-	for defense in defenses_areas:
+	for d in defenses_areas:
 			# Queue defenses for animation
-			match defense:
+			match d:
 				"HeadArea":
 					if !defenses.has("Head_Defense_1"):
 						defenses.append("Head_Defense_" + randNumber(1, 1))
@@ -93,20 +98,3 @@ func start_round():
 	# If there's playable attack_animations start round
 	if len(attacks) > 0 and len(attacks) <= len(attacks_areas):
 		fightManager.start_round()
-		
-# Return a random number
-func randNumber(min, max):
-	var number = randi() % max + min
-	
-	return str(number)
-
-func attack(attack):
-	animPlayer.play(attack)
-	
-func defense(defense):
-	animPlayer.play(defense)
-	
-# On every finished animation
-func _on_animation_finished(anim):
-	animPlayer.play("Battle_Idle_1")
-	emit_signal("anim_finished", "Player")
