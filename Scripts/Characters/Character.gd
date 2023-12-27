@@ -1,5 +1,7 @@
 extends Node
 
+var life = 50
+
 var attacks = []
 var defenses = []
 var maxAttacks
@@ -79,3 +81,7 @@ func impact(a):
 func _on_animation_finished(anim):
 	animPlayer.play("Battle_Idle_1")
 	emit_signal("anim_finished", anim)
+
+# Change UI life
+func lifeUI(lifeBar):
+	lifeBar.value = life

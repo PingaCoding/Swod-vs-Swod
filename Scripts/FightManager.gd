@@ -5,14 +5,13 @@ extends Node3D
 
 var current_round = 1
 
+var played_animations = 0
+signal round_animations
+
 var playerAttacks = []
 var playerDefenses = []
 var enemyAttacks = []
 var enemyDefenses = []
-
-signal attack_anim_finished()
-signal defense_anim_finished()
-signal impact_anim_finished()
 
 var attackCharacter = ""
 var defenseCharacter = ""
@@ -23,18 +22,22 @@ var defenseCharacter = ""
 		"attacks": playerAttacks,
 		"defenses": playerDefenses,
 		"character": player,
-		"damage": 15
+		"damage": 15,
+		"lifeBar": player.lifeBar
 	}, 
 	"Enemy": {
 		"attacks": enemyAttacks,
 		"defenses": enemyDefenses,
 		"character": enemy,
-		"damage": 15
+		"damage": 15,
+		"lifeBar": enemy.lifeBar
 	}
 }
 
 # Start round
 func start_round():
+	characters["Player"]["lifeBar"] = player.lifeBar
+	characters["Enemy"]["lifeBar"] = enemy.lifeBar
 	# Define enemy attacks and defenses
 	enemy.choose_attacks_defenses()
 	
@@ -65,14 +68,11 @@ func start_round():
 
 # Emit signals for finished animations
 func anim_finished_signal(anim):
-	if anim.split("_")[1] == "Attack":
-		emit_signal("attack_anim_finished")
+	if anim.split("_")[1] != "Idle":
+		played_animations+=1
 
-	elif anim.split("_")[1] == "Defense":
-		emit_signal("defense_anim_finished")
-
-	elif anim.split("_")[1] == "Impact":
-		emit_signal("impact_anim_finished")
+	if played_animations == 2:
+		emit_signal("round_animations")
 	
 # Manage attacks and defenses
 func attack_defense():
@@ -90,30 +90,50 @@ func attack_defense():
 		
 		# Activate attack by attack
 		for attack in characters[attackCharacter]["attacks"]:
-			characters[attackCharacter]["character"].attack(attack)
-			#characters[defenseCharacter]["character"].take_damage(characters[attackCharacter]["damage"])
+			# Character attack
+			character_attack(attack)
 			var noDefense = 0
 
 			# Check if attack has a defense for it and if yes activate
 			for defense in characters[defenseCharacter]["defenses"]: 
 				if attack.split("_")[0] == defense.split("_")[0]:
-					characters[defenseCharacter]["character"].defense(defense)
-					# Wait defense animation to end
-					await defense_anim_finished
+					# Character defense
+					character_defense(defense)
 				else:
 					noDefense+=1
 
 			if noDefense == len(characters[defenseCharacter]["defenses"]):
-				characters[defenseCharacter]["character"].impact(attack)
-				await impact_anim_finished
-				print("Impact occured ", attack)
-			
-			# Wait attack animation to end
-			await attack_anim_finished
-		
+				# Character impact
+				character_impact(attack)
+
+			await round_animations
+			played_animations = 0
+
 		# Start next round
 		current_round += 1
 		attack_defense()
+
+# Manage character attacks
+func character_attack(attack):
+	# Play the attack
+	characters[attackCharacter]["character"].attack(attack)
+
+# Manage character defenses
+func character_defense(defense):
+	# Play the defense
+	characters[defenseCharacter]["character"].defense(defense)
+
+# Manage character impacts
+func character_impact(attack):
+	# Play the impact
+	characters[defenseCharacter]["character"].impact(attack)
+
+	# Wait all animations to end
+	await round_animations
+
+	# Manages damage suffered
+	characters[defenseCharacter]["character"].life -= characters[attackCharacter]["damage"]
+	characters[defenseCharacter]["character"].lifeUI(characters[defenseCharacter]["lifeBar"])
 
 # End round
 func end_round():
@@ -137,3 +157,6 @@ func end_round():
 	characters["Player"]["attacks"] = []
 	characters["Enemy"]["attacks"] = []
 	characters["Enemy"]["attacks"] = []
+
+	if player.life <= 0 or enemy.life <= 0:
+		print("cabou tudo")

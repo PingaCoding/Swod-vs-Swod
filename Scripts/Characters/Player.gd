@@ -5,9 +5,10 @@ signal anim_finished
 var attacks_areas = []
 var defenses_areas = []
 
-@onready var fightButton = $PlayerCanvas/Button
+@onready var fightButton = get_node("/root/Level 1/Canvas/FightButtonContainer/FightButton")
 @onready var bodyPartsMain = $Player/Skeleton3D/BodyParts
 @onready var fightManager = get_node("/root/Level 1/FightManager")
+@onready var lifeBar = get_node("/root/Level 1/Canvas/PlayerLifeContainer/LifeBar")
 
 @onready var enemy = get_node("/root/Level 1/Enemy")
 
@@ -26,8 +27,8 @@ func _ready():
 	set_animations_blend_time()
 	
 	# Define max attacks and defenses
-	maxAttacks = 3
-	maxDefenses = 3
+	maxAttacks = 2
+	maxDefenses = 1
 	
 	pass
 
@@ -35,21 +36,21 @@ func _ready():
 func choose_attack_defense(type, option, add):
 	var currentBodyParts
 	var areas
-	var max
+	var maxActions
 	
 	if(type == "attack"):
 		currentBodyParts = enemy.bodyParts
 		areas = attacks_areas
-		max = maxAttacks
+		maxActions = maxAttacks
 	else:
 		currentBodyParts = bodyParts
 		areas = defenses_areas
-		max = maxDefenses
+		maxActions = maxDefenses
 	
 	# Adding attack/defense
 	if add:
 		# If there's less than max attacks/defenses add the current one
-		if len(areas) < max:
+		if len(areas) < maxActions:
 			if option not in areas:
 				areas.append(option)
 				

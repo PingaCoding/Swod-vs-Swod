@@ -2,7 +2,8 @@ extends "res://Scripts/Characters/Character.gd"
 
 signal anim_finished
 
-@onready var fightManager = get_node("/root/Level 1/FightManager")
+@onready var lifeBar = get_node("/root/Level 1/Canvas/EnemyLifeContainer/LifeBar")
+
 var bodyPartsMain
 
 func _ready():
